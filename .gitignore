@@ -1,0 +1,4 @@
+*.sqlite3
+settings.json
+launch.json
+__pycache__/
