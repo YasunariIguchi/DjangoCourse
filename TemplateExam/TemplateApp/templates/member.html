@@ -1,4 +1,7 @@
 {% load static%}
+<header>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+</header>
 <h1>{{ member.name }}</h1>
 <img src="{% static member.img %}" alt="{{ member.name }}">
 <p>入会日: {{ member.entry_date|date:"Y年m月d日" }}</p>
