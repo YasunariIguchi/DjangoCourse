@@ -1,0 +1,9 @@
+<h1>メンバーたち</h1>
+
+{%for member in members %}
+<p>
+    <a href="{% url 'template_app:member' id=member.id %}">{{ member.name }}</a>
+</p>
+{% endfor %}
+
+<a href="{% url 'template_app:home' %}">戻る</a>

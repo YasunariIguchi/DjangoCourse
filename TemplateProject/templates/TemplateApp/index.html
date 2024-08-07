@@ -1,0 +1,16 @@
+
+{% extends "TemplateApp/base.html" %}
+{% load filter%}
+{%block title%} bdaodaodao {%endblock%}
+{% block contentdayo%}
+<h1>aaa!!!?</h1>
+
+{% if value %}
+
+<p>{{value | secondfilter}}</p>
+
+<a href="{% url 'template_app:ichiran' %}"> 一蘭のページへ </a>
+
+{%endif%}
+
+{% endblock %}

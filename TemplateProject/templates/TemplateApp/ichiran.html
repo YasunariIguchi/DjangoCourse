@@ -1,0 +1,22 @@
+
+{% extends "TemplateApp/base.html" %}
+{% load static %}
+{%block head%}
+<link rel="stylesheet" type="text/css" href="{% static 'static1/aaa.css' %}">
+{%endblock%}
+{%block title%} ichiran {%endblock%}
+{% block contentdayo%}
+<h1>aaa!!!?</h1>
+
+{% if ramen %}
+
+<p>麺タイプ：{{ ramen.men }}</p>
+<p>スープタイプ：{{ramen.soup}}</p>
+
+<a href="{% url 'template_app:index' %}"> 戻る </a>
+<a href="{% url 'template_app:yourname' sei='iguchi' mei='yasunari' %}"> yourname </a>
+<img src="{%static 'static1/sample.jpg'%}">
+
+{%endif%}
+
+{% endblock %}
