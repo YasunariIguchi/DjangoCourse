@@ -3,6 +3,8 @@
     <head>
         <meta charset="utf-8">
         <title>Form</title>
+        {%load static%}
+        <link rel="stylesheet" href = "{% static 'css/style.css' %}"">        
     </head>
     <body>
         <form method="post">
@@ -10,6 +12,7 @@
             <table>
             {{form.as_table}}
             </table>
+            <!--
             {% if form.errors %}
             <div class="errorlist">
                 {% for field in form %}
@@ -26,6 +29,7 @@
                 {% endif %}
             </div>
             {% endif %}
+            -->
             <input type="submit" value="送信">
         </form>
     </body>

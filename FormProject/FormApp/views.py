@@ -18,4 +18,5 @@ def form_page(request):
             print(form.cleaned_data)
         else:
             print("dame")
+            print(form.errors)
     return render(request, "formapp/form_page.html", {"form": form})
