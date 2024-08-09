@@ -3,6 +3,7 @@ from typing import Any
 from django import forms
 from django.forms.utils import ErrorList
 from django.core import validators
+from .models import Post, User
 
 def check_name(value):
     if value == "aaaaa":
@@ -65,3 +66,50 @@ class UserInfo(forms.Form):
         if mail != verify_mail:
             raise forms.ValidationError("メールアドレスが一致しないお")
             
+class BaseForm(forms.ModelForm):
+    def save(self, *args, **kwargs):
+        print(f"From: {self.__class__.__name__}実行")
+        return super(BaseForm, self).save(*args, **kwargs)
+class PostModelForm(BaseForm):
+    name = forms.CharField(label="名前")
+    title = forms.CharField(label="タイトルだお")
+    memo = forms.CharField(label="メモ",
+        widget=forms.Textarea(attrs={'rows': 30, 'cols': 50})
+    )
+    class Meta:
+        model = Post
+        fields = '__all__'
+        # fields = ["name", "title"]
+        # exclude = ["title"]
+    
+    def save(self, *args, **kwagrs):
+        obj = super().save(commit=False, *args, **kwagrs)
+        obj.name = obj.name.upper()
+        obj.save()
+        print(type(obj))
+        print("save実行")
+        return obj
+
+    def clean_name(self):
+        name = self.cleaned_data.get("name")
+        if name == "ああああ":
+            raise validators.ValidationError("その名前は禁止されていますお。")
+        return name
+    
+    def clean_title(self):
+        title = self.cleaned_data.get("title")
+        if title == "かかかか":
+            raise validators.ValidationError("そのタイトルは禁止されていますお。")
+        return title
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        title = cleaned_data.get("title")
+        if Post.objects.filter(title=title).exists():
+            raise validators.ValidationError("そのタイトルは存在するお")
+        return cleaned_data
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = '__all__'
