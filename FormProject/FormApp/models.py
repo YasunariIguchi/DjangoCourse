@@ -13,3 +13,12 @@ class User(models.Model):
     name = models.CharField(max_length=50)
     age = models.IntegerField()
     picture = models.FileField(upload_to='picture/%Y/%m/%d')
+    
+class Student(models.Model):
+    name = models.CharField(max_length=50)
+    age = models.IntegerField()
+    grade = models.IntegerField()
+    picture = models.FileField(upload_to="exam/%Y/%m/%d")
+    class Meta:
+        db_table = "students"
+        

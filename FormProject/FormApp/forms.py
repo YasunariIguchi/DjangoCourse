@@ -3,7 +3,7 @@ from typing import Any
 from django import forms
 from django.forms.utils import ErrorList
 from django.core import validators
-from .models import Post, User
+from .models import Post, User, Student
 
 def check_name(value):
     if value == "aaaaa":
@@ -112,4 +112,10 @@ class PostModelForm(BaseForm):
 class UserForm(forms.ModelForm):
     class Meta:
         model = User
+        fields = '__all__'
+
+
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
         fields = '__all__'

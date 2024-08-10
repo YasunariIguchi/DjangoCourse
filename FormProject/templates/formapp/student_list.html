@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>おっさんリスト</title>
+    </head>
+    <body>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <a href="{% url 'form_app:student_create' %}">
+            <button>新しくおっさんを生成する</button>
+        </a>
+        <a href="{% url 'form_app:student_set_form' %}">
+            <button>おっさん一括挿入</button>
+        </a>
+        {%if students%}
+        <table border="1">
+            <tr style="background: aqua;">
+                <th>名前</th>
+                <th>年齢</th>
+                <th>学年</th>
+                <th>編集</th>
+            </tr>
+            {% for s in students %}
+            <tr>
+                <td>{{ s.name }}</td>
+                <td>{{ s.age }}</td>
+                <td>{{ s.grade }}</td>
+                <td>
+                    <a href="{% url 'form_app:student_update' id=s.id %}">
+                        <button>編集</button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        {%endif%}
+
+    </body>
+</html>

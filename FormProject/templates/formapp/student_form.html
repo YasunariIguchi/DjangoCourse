@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Student Form</title>
+    </head>
+    <body>
+        <form method="POST" enctype="multipart/form-data">
+            {%csrf_token%}
+            {{ form.as_p }}
+            <input type="submit" value="保存">
+        </form>
+        {%if student%}
+        <p>name: {{student.name}}</p>
+        <p>age: {{student.age}}</p>
+        <p>grade: {{student.grade}}</p>
+        <img src="{{student.picture.url}}">
+        <a href="{{student.picture.url}}">{{student.picture.url}}</a>
+        {%endif%}
+    </body>
+</html>
