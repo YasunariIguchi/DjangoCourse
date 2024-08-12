@@ -1,0 +1,14 @@
+<table>
+    <tr>
+        <th>名前</th><th>値段</th>
+    </tr>
+    <tr>
+        <td>{{item.name}}</td><td>{{item.price}}円</td>
+    </tr>
+</table>
+
+<a href="{% url 'store:item_list' %}">
+    <button>
+        戻る
+    </button>
+</a>
