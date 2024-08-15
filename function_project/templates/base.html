@@ -9,10 +9,18 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="{% url 'accounts:home' %}">ホーム</a>
             {% if user.is_authenticated %}
+            <a class="navbar-brand" href="{% url 'accounts:user_edit' %}">ユーザー情報更新</a>
+            <a class="navbar-brand" href="{% url 'accounts:user_logout' %}">ログアウト</a>
             {% else %}
             <a class="navbar-brand" href="{% url 'accounts:regist' %}">ユーザー登録</a>
+            <a class="navbar-brand" href="{% url 'accounts:user_login' %}">ログイン</a>
             {% endif %}
         </nav>
+        {% if messages %}
+        {% for message in messages%}
+        <div>{{message.message}}</div>
+        {% endfor %}
+        {% endif %}
         {% block content %}{% endblock %}
     </body>
 </html>

@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from uuid import uuid4
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.contrib.auth.models import UserManager
 # Create your models here.
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -17,6 +18,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
+    
+    objects = UserManager()
     
     class Meta:
         db_table = "users"
