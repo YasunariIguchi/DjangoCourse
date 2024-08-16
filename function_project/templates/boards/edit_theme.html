@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="テーマ更新">
+</form>
+<a href="{% url 'boards:delete_theme' id=id %}">削除</a>
+
+{% endblock %}

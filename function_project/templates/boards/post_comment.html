@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <h2>過去のコメント</h2>
+    {% for comment in comments %}
+        <div>
+            <strong>{{ comment.user.username }}</strong>: {{ comment.comment }}
+        </div>
+    {% empty %}
+        <p>コメントはまだありません。</p>
+    {% endfor %}
+</div>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="コメント登録">
+</form>
+
+{% endblock %}

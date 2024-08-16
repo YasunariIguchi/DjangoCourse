@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    掲示板「{{ title }}」を削除しますか？
+    <input type="submit" value="掲示板削除">
+</form>
+<a href="{% url 'boards:edit_theme' id=id %}">戻る</a>
+
+{% endblock %}
