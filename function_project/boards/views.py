@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Theme, Comment
 from django.http import Http404
+from django.core.cache import cache
+from django.http import JsonResponse
 
 # Create your views here.
 @login_required
@@ -55,12 +57,16 @@ def delete_theme(request, id):
     })
 
 def post_comment(request, theme_id):
-    form = forms.PostCommentForm(request.POST or None)
+    saved_comment = cache.get(f'saved_comment-theme_id={theme_id}-user_id={request.user.id}', "")
+    form = forms.PostCommentForm(request.POST or None, initial={"comment": saved_comment})
     comments = Comment.objects.fetch_by_theme_id(theme_id)
     if form.is_valid():
+        if not request.user.is_authenticated:
+            raise Http404
         form.instance.user = request.user
         form.instance.theme = get_object_or_404(Theme, id=theme_id)
         form.save()
+        cache.delete(f'saved_comment-theme_id={theme_id}-user_id={request.user.id}')
         messages.success(request, "コメントを投稿しました。")
         return redirect("boards:list_themes")
     return render(request, "boards/post_comment.html", context={
@@ -68,3 +74,13 @@ def post_comment(request, theme_id):
         "theme_id": theme_id,
         "comments": comments
     })
+
+def save_comment(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        comment = request.GET.get("comment")
+        theme_id = request.GET.get("theme_id")
+        if comment and theme_id:
+            cache.set(f'saved_comment-theme_id={theme_id}-user_id={request.user.id}', comment)
+            return JsonResponse({"message": "一時保存しました"})
+    return JsonResponse({"message": "無効なリクエストです"}, status=400)
+
