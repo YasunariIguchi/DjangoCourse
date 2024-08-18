@@ -1,6 +1,6 @@
 from typing import Any
 from django.db.models.query import QuerySet
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.base import (
     View, TemplateView, RedirectView 
 )
@@ -9,10 +9,11 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from . import forms
 from datetime import datetime
-from .models import Book
+from .models import Book, Picture
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
-
+from django.contrib import messages
+import os
 # Create your views here.
 
 class IndexView(View):
@@ -82,6 +83,22 @@ class BookUpdateView(SuccessMessageMixin, UpdateView):
     
     def get_success_message(self, cleaned_data: dict[str, str]) -> str:
         return cleaned_data.get("name") + "を更新したお"
+    
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        picture_form = forms.PictureUploadForm()
+        context["picture_form"] = picture_form
+        pictures = Picture.objects.filter_by_book(self.object)
+        context["pictures"] = pictures
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        #画像をアップロードする処理
+        picture_form = forms.PictureUploadForm(request.POST or None, request.FILES or None)
+        if picture_form.is_valid() and request.FILES:
+            book = self.get_object()  
+            picture_form.save(book=book)
+        return super().post(request, *args, **kwargs)
 
 class BookDeleteView(DeleteView):
     model = Book
@@ -103,3 +120,13 @@ class BookFormView(FormView):
 
 class BookRedirectView(RedirectView):
     url = "https://google.com"
+
+
+def delete_picture(request, pk):
+    picture = get_object_or_404(Picture, pk=pk)
+    picture.delete()
+    # if os.path.isfile(picture.picture.path):
+    #     os.remove(picture.picture.path)
+    
+    messages.success(request, "画像を削除しました")
+    return redirect("store:update_book", pk=picture.book.id)

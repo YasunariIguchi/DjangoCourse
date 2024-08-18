@@ -1,5 +1,6 @@
+from typing import Any
 from django import forms
-from .models import Book
+from .models import Book, Picture
 from datetime import datetime
 
 class BookForm(forms.ModelForm):
@@ -22,5 +23,21 @@ class BookUpdateForm(forms.ModelForm):
     def save(self, *args, **kwargs):
         obj = super(BookUpdateForm, self).save(commit=False)
         obj.update_at = datetime.now()
+        obj.save()
+        return obj
+
+
+class PictureUploadForm(forms.ModelForm):
+    picture = forms.FileField(required=False) 
+    
+    class Meta:
+        model = Picture
+        fields =["picture",]
+    
+    def save(self, *args, **kwargs) -> Any:
+        obj = super().save(commit=False)
+        obj.create_at = datetime.now()
+        obj.update_at = datetime.now()
+        obj.book = kwargs.get("book")
         obj.save()
         return obj

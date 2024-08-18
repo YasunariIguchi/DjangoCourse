@@ -19,7 +19,10 @@
             <th>名前</th>
             <th>説明</th>
             <th>金額</th>
-            <th>操作</th> <!-- 操作列を追加 -->
+            <th>詳細</th>
+            <th>編集</th>
+            <th>削除</th>
+            <th>画像</th>
         </tr>
     </thead>
     <tbody>
@@ -28,10 +31,13 @@
             <td>{{object.name}}</td>
             <td>{{object.description}}</td>
             <td>{{object.price}}</td>
+            <td><a href="{% url 'store:detail_book' object.id %}">詳細</a></td>
+            <td><a href="{% url 'store:update_book' object.id %}">編集</a></td>
+            <td><a href="{% url 'store:delete_book' object.id %}">削除</a></td>
             <td>
-                <a href="{% url 'store:detail_book' object.id %}">詳細</a>
-                <a href="{% url 'store:update_book' object.id %}">編集</a>
-                <a href="{% url 'store:delete_book' object.id %}">削除</a>
+                {% for picture in object.picture_set.all %}
+                    <img width="20px" height="20px" src="{{ picture.picture.url }}">
+                {% endfor  %}
             </td>
         </tr>
         {% endfor %}
