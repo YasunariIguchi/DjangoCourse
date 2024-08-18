@@ -1,0 +1,39 @@
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+<a href="{% url 'store:add_book' %}" class="btn btn-primary">本を追加する</a>
+<table>
+    <thead>
+        <tr>
+            <th>名前</th>
+            <th>説明</th>
+            <th>金額</th>
+            <th>操作</th> <!-- 操作列を追加 -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for object in object_list %}
+        <tr>
+            <td>{{object.name}}</td>
+            <td>{{object.description}}</td>
+            <td>{{object.price}}</td>
+            <td>
+                <a href="{% url 'store:detail_book' object.id %}">詳細</a>
+                <a href="{% url 'store:update_book' object.id %}">編集</a>
+                <a href="{% url 'store:delete_book' object.id %}">削除</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

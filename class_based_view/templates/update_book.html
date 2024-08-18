@@ -1,0 +1,11 @@
+{% if messages %}
+{% for message in messages%}
+<p>{{message.message}}</p>
+{% endfor %}
+{% endif%}
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="更新">
+</form>
