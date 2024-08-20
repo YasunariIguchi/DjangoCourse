@@ -2,6 +2,7 @@ from typing import Any
 from django import forms
 from .models import User
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.forms import AuthenticationForm
 
 
 class RegistForm(forms.ModelForm):
@@ -19,3 +20,12 @@ class RegistForm(forms.ModelForm):
         validate_password(password, self.instance)
         self.instance.set_password(password)
         return super().save(commit=commit)
+
+
+# class UserLoginForm(forms.Form):
+#     email = forms.EmailField(label="メールアドレス")
+#     password = forms.CharField(label="パスワード", widget=forms.PasswordInput())
+class UserLoginForm(AuthenticationForm):
+    username = forms.EmailField(label="メールアドレス")
+    password = forms.CharField(label="パスワード", widget=forms.PasswordInput())
+    remember = forms.BooleanField(label="ログイン状態を保持する", required=False)
