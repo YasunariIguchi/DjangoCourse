@@ -13,6 +13,7 @@ class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
     readonly_fields = ('create_at', 'update_at')
     inlines = [PictureInline]
+    list_display = ('name',)
 
 
 admin.site.register(Product, ProductAdmin)

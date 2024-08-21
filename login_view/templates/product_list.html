@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>商品一覧</h1>
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>名前</th><th>タイプ</th><th>製造者</th><th>価格</th><th>在庫数</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in object_list %}
+        <tr>
+            <td>{{product.name}}</td>
+            <td>{{product.type}}</td>
+            <td>{{product.producer}}</td>
+            <td>{{product.price}}</td>
+            <td>{{product.stock}}</td>
+        </tr>
+        {% endfor %}
+    <tbody>
+</table>
+
+
+{% endblock %}
