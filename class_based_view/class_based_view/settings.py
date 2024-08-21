@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "class_based_view.middleware.PerformanceMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "class_based_view.middleware.MyMiddleware",
 ]
 
 ROOT_URLCONF = "class_based_view.urls"
@@ -127,3 +129,70 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s %(levelname)s [%(pathname)s:%(lineno)s] %(message)s",
+        },
+    },
+    "handlers": {
+        "console_handler": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "timed_file_handler": {
+            "level": "INFO",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": os.path.join("class_based_view", "logs", "application.log"),
+            "when": "S",
+            "interval": 10,
+            "backupCount": 10,
+            "formatter": "simple",
+            "encoding": "utf-8",
+            "delay": True,
+        },
+        "timed_error_handler": {
+            "level": "ERROR",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": os.path.join("class_based_view", "logs", "application_error.log"),
+            "when": "S",
+            "interval": 10,
+            "backupCount": 10,
+            "formatter": "simple",
+            "encoding": "utf-8",
+            "delay": True,
+        },
+        "timed_performance_handler": {
+            "level": "INFO",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": os.path.join("class_based_view", "logs", "application_performance.log"),
+            "when": "S",
+            "interval": 10,
+            "backupCount": 10,
+            "formatter": "simple",
+            "encoding": "utf-8",
+            "delay": True,
+        },
+    },
+    "loggers": {
+        "application-logger": {
+            "handlers": ["console_handler", "timed_file_handler"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "error-logger": {
+            "handlers": ["timed_error_handler",],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "performance-logger": {
+            "handlers": ["timed_performance_handler",],
+            "level": "INFO",
+            "propagate": False,
+        }
+    }
+}

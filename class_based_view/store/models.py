@@ -3,8 +3,10 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.dispatch import receiver
 import os
+import logging
 # Create your models here.
 
+application_logger = logging.getLogger("application-logger")
 
 class BaseModel(models.Model):
     create_at = models.DateTimeField()
@@ -51,3 +53,5 @@ def delete_picture(sender, instance, **kwargs):
     if instance.picture:
         if os.path.isfile(instance.picture.path):
             os.remove(instance.picture.path)
+            application_logger.info(f"{instance.picture.path}を削除したお")
+            application_logger.debug(f"{instance.picture.path}を削除したお,デバッグバージョン")
