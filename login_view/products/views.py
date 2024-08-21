@@ -10,5 +10,12 @@ class ProductListView(LoginRequiredMixin, ListView):
     template_name = "product_list.html"
 
     def get_queryset(self):
-        qs = super().get_queryset().order_by("-price")
-        return qs
+        query = super().get_queryset()
+        product_name = self.request.GET.get("product_name", "")
+        product_type_name = self.request.GET.get("product_type_name", "")
+        if product_name:
+            query = query.filter(name__icontains=product_name)
+
+        if product_type_name:
+            query = query.filter(type__icontains=product_type_name)
+        return query
