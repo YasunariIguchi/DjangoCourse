@@ -6,7 +6,8 @@ from django.views.generic.base import (
 )
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
+from django.views.generic.edit import (
+    CreateView, UpdateView, DeleteView, FormView)
 from . import forms
 from datetime import datetime
 from .models import Book, Picture
@@ -31,6 +32,7 @@ class IndexView(View):
         if book_form.is_valid():
             book_form.save()
         return render(request, "index.html", context={"book_form": book_form})
+
 
 class HomeView(TemplateView):
     template_name = "home.html"
@@ -64,13 +66,14 @@ class BookListView(ListView):
         qs = super(BookListView, self).get_queryset().order_by("-price")
         return qs
 
+
 class BookCreateView(CreateView):
     model = Book
     fields = ["name", "description", "price"]
     template_name = "add_book.html"
     success_url = reverse_lazy("store:list_books")
 
-    def form_valid(self,form):
+    def form_valid(self, form):
         form.instance.create_at = datetime.now()
         form.instance.update_at = datetime.now()
         return super().form_valid(form)
@@ -80,6 +83,7 @@ class BookCreateView(CreateView):
         initial["name"] = "sample"
         return initial
 
+
 class BookUpdateView(SuccessMessageMixin, UpdateView):
     model = Book
     template_name = "update_book.html"
@@ -88,7 +92,7 @@ class BookUpdateView(SuccessMessageMixin, UpdateView):
 
     def get_success_url(self) -> str:
         # print(self.get_object)
-        return reverse_lazy("store:update_book", kwargs ={"pk": self.object.id })
+        return reverse_lazy("store:update_book", kwargs={"pk": self.object.id})
 
     def get_success_message(self, cleaned_data: dict[str, str]) -> str:
         return cleaned_data.get("name") + "を更新したお"
@@ -102,12 +106,14 @@ class BookUpdateView(SuccessMessageMixin, UpdateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        #画像をアップロードする処理
-        picture_form = forms.PictureUploadForm(request.POST or None, request.FILES or None)
+        # 画像をアップロードする処理
+        picture_form = forms.PictureUploadForm(request.POST or None,
+                                               request.FILES or None)
         if picture_form.is_valid() and request.FILES:
             book = self.get_object()
             picture_form.save(book=book)
         return super().post(request, *args, **kwargs)
+
 
 class BookDeleteView(DeleteView):
     model = Book
@@ -120,12 +126,13 @@ class BookFormView(FormView):
     form_class = forms.BookForm
     success_url = reverse_lazy("store:list_books")
 
-    def form_valid(self,form):
+    def form_valid(self, form):
         if form.is_valid():
             form.instance.create_at = datetime.now()
             form.instance.update_at = datetime.now()
             form.save()
         return super().form_valid(form)
+
 
 class BookRedirectView(RedirectView):
     url = "https://google.com"

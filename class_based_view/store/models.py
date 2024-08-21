@@ -8,6 +8,7 @@ import logging
 
 application_logger = logging.getLogger("application-logger")
 
+
 class BaseModel(models.Model):
     create_at = models.DateTimeField()
     update_at = models.DateTimeField()
@@ -54,4 +55,5 @@ def delete_picture(sender, instance, **kwargs):
         if os.path.isfile(instance.picture.path):
             os.remove(instance.picture.path)
             application_logger.info(f"{instance.picture.path}を削除したお")
-            application_logger.debug(f"{instance.picture.path}を削除したお,デバッグバージョン")
+            application_logger.debug(
+                f"{instance.picture.path}を削除したお,デバッグバージョン")

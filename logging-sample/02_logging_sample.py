@@ -10,7 +10,8 @@ s_handler.setLevel(logging.DEBUG)
 f_handler.setLevel(logging.DEBUG)
 
 s_formatter = logging.Formatter("%(name)s-%(levelname)s-%(message)s")
-f_formatter = logging.Formatter("%(asctime)s-%(name)s-%(levelname)s-%(message)s")
+f_formatter = logging.Formatter(
+    "%(asctime)s-%(name)s-%(levelname)s-%(message)s")
 
 s_handler.setFormatter(s_formatter)
 f_handler.setFormatter(f_formatter)
