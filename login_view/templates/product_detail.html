@@ -13,11 +13,46 @@
 <p>価格：{{ object.price }}円</p>
 <p>在庫数：{{ object.stock }}個</p>
 {% if object.stock %}
-<input type="number" id="quantity" name="quantity" min="1" max="{{ object.stock }}"><br>
-<button id="add_product" type="button" class="btn btn-primary">カートに追加</button>
+    {% if is_added %}
+    <button type="button" class="btn btn-danger">カートに追加済です。</button>
+    {% else %}
+        <input type="number" id="quantity" name="quantity" min="1" max="{{ object.stock }}"><br>
+        <button id="add_product" type="button" class="btn btn-primary">カートに追加</button>
+    {% endif %}
 {% endif %}
+<input name="csrfToken" value="{{ csrf_token }}" type="hidden">
 
 <a href="{% url 'products:product_list' %}">一覧に戻る</a>
 
+<script>
+    $("#add_product").click(function(){
+        var quantity = $("#quantity").val();
+        var token = $("input[name='csrfToken']").attr("value");
+        $.ajaxSetup({
+            beforeSend: function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", token);
+            }
+        })
+        $.ajax({
+            url: "{% url 'products:add_product' %}",
+            type: "POST",
+            data: {product_id: "{{ object.id }}",
+                quantity: quantity,
+            },
+            dataType: "json",
+            success: function(json){
+                if(json.message){
+                    $("#add_product").attr("class", "btn btn-danger")
+                    $("#add_product").html("カート登録済だお")
+                    $("#add_product").prop("disabled", true)
+                    alert(json.message);
+                }
+            },
+            error: function(error){
+                alert(error.responseJSON.message);
+            }
+        });
+    });
+</script>
 
 {% endblock %}

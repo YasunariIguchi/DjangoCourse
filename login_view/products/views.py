@@ -1,10 +1,12 @@
-# from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 # Create your views here.
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from .models import Product
+from .models import Product, Cart, CartItem
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, Http404
 
 class ProductListView(LoginRequiredMixin, ListView):
     model = Product
@@ -34,4 +36,29 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["is_added"] = CartItem.objects.filter(product=context["product"], cart=Cart.objects.filter(user=self.request.user).first()).exists()
         return context
+
+
+@login_required
+def add_product(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        product_id = request.POST.get("product_id")
+        quantity = request.POST.get("quantity")
+        product = get_object_or_404(Product, id=product_id)
+        if int(quantity) > product.stock:
+            response = JsonResponse({"message": "在庫数を超えています"})
+            response.status_code = 403
+            return response
+        if int(quantity) <= 0:
+            response = JsonResponse({"message": "在庫数は1以上を入力してください"})
+            response.status_code = 403
+            return response
+        cart = Cart.objects.get_or_create(user=request.user)
+        if all([product_id, cart, quantity]):
+            CartItem.objects.save_item(
+                quantity=quantity,
+                product_id=product_id,
+                cart=cart[0]
+            )
+            return JsonResponse({"message": "商品をカートに追加しました。"})
