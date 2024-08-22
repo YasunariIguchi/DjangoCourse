@@ -62,3 +62,37 @@ def add_product(request):
                 cart=cart[0]
             )
             return JsonResponse({"message": "商品をカートに追加しました。"})
+
+
+class CartItemListView(LoginRequiredMixin, ListView):
+    model = CartItem
+    template_name = "cartitem_list.html"
+
+    def get_queryset(self):
+        query = super().get_queryset()
+        query.filter(cart=Cart.objects.get(user=self.request.user))
+        return query
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = self.get_queryset()
+        total_price = 0
+        items = []
+        for q in query:
+            total_price += q.quantity * q.product.price
+            picture = q.product.picture_set.first()
+            picture = picture.picture if picture else None
+            in_stock = True if q.quantity <= q.product.stock else False
+            tmp_item = {
+                "quantity": q.quantity,
+                "picture": picture,
+                "name": q.product.name,
+                "id": q.id,
+                "price": q.product.price,
+                "in_stock": in_stock,
+            }
+            items.append(tmp_item)
+        context["items"] = items
+        context["total_price"] = total_price
+
+        return context

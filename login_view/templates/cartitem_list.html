@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>カートの中身一覧</h1>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>画像</th><th>名前</th><th>価格</th><th>注文数</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>
+                {% if item.picture %}
+                <a href="{{ item.picture.url }}" target="_blank">
+                    <img width="100px" height="100px" src="{{ item.picture.url }}">
+                </a>
+                {% endif %}
+            </td>
+            <td><a href="{% url 'products:product_detail' pk=item.id %}">{{item.name}}</a></td>
+            <td>{{item.price}}</td>
+            <td>
+                {{item.quantity}}<br>
+                {% if not item.in_stock%}
+                在庫数を超えています。注文数を修正してくださいお。
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    <tbody>
+</table>
+
+<div style="text-align: right; margin-top: 20px;">
+    <strong>合計金額: {{ total_price }}円</strong>
+</div>
+
+
+{% endblock %}
