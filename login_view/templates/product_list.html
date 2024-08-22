@@ -11,6 +11,13 @@
         <label for="product_type_name_dao" class="form-label">タイプ</label>
         <input type="text" class="form-control" id="product_type_name_dao" name="product_type_name" value="{{ request.GET.product_type_name }}" style="width: 200px;">
     </div>
+    <div class="mb-3">
+        <label class="form-label">価格順</label><br>
+        <input type="radio" id="price_asc" name="price_order" value="asc" {% if request.GET.price_order == "asc" %}checked{% endif %}>
+        <label for="price_asc">昇順</label><br>
+        <input type="radio" id="price_desc" name="price_order" value="desc" {% if request.GET.price_order == "desc" %}checked{% endif %}>
+        <label for="price_desc">降順</label>
+    </div>
     <button type="submit" class="btn btn-primary">実行</button>
 </form>
 <table class="table table-bordered">
@@ -22,7 +29,7 @@
     <tbody>
         {% for product in object_list %}
         <tr>
-            <td>{{product.name}}</td>
+            <td><a href="{% url 'products:product_detail' pk=product.id %}">{{product.name}}</a></td>
             <td>{{product.type}}</td>
             <td>{{product.producer}}</td>
             <td>{{product.price}}</td>

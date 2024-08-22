@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>商品詳細</h1>
+{% for picture in object.picture_set.all %}
+<a href="{{ picture.picture.url }}" target="_blank">
+    <img width="500px" height="500px" src="{{ picture.picture.url }}">
+</a>
+{% endfor %}
+<p>名前：{{ object.name }}</p>
+<p>タイプ：{{ object.type }}</p>
+<p>製造者：{{ object.producer.username }}</p>
+<p>価格：{{ object.price }}円</p>
+<p>在庫数：{{ object.stock }}個</p>
+{% if object.stock %}
+<input type="number" id="quantity" name="quantity" min="1" max="{{ object.stock }}"><br>
+<button id="add_product" type="button" class="btn btn-primary">カートに追加</button>
+{% endif %}
+
+<a href="{% url 'products:product_list' %}">一覧に戻る</a>
+
+
+{% endblock %}

@@ -3,6 +3,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.utils import timezone
 import os
+from accounts.models import User
 
 # Create your models here.
 
@@ -72,3 +73,23 @@ def delete_picture(sender, instance, **kwargs):
     if instance.picture:
         if os.path.isfile(instance.picture.path):
             os.remove(instance.picture.path)
+
+
+class Cart(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE,
+        primary_key=True
+    )
+
+    class Meta:
+        db_table = "carts"
+
+
+class CartItem(models.Model):
+    quantity = models.PositiveIntegerField()
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "cart_items"
+        unique_together = [["product", "cart"]]
