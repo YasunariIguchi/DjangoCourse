@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>注文情報削除</h1>
+<form method="POST">
+{% csrf_token %}
+<p>削除しますか？</p>
+<input type="submit" value="カートから削除">
+</form>
+
+
+{% endblock %}

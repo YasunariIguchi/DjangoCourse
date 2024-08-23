@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>注文情報更新</h1>
+<p>商品名：{{object.product.name}}</p>
+<p>価格：{{object.product.price}}</p>
+<p>在庫数：{{object.product.stock}}</p>
+<form method="POST">
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="更新">
+</form>
+<a href="{% url 'products:cartitem_delete' pk=object.id %}"><button>削除</button></a>
+
+
+{% endblock %}

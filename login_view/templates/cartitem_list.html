@@ -6,7 +6,7 @@
 <table class="table table-bordered">
     <thead class="table-dark">
         <tr>
-            <th>画像</th><th>名前</th><th>価格</th><th>注文数</th>
+            <th>画像</th><th>名前</th><th>価格</th><th>注文数</th><th>修正</th>
         </tr>
     </thead>
     <tbody>
@@ -27,6 +27,9 @@
                 在庫数を超えています。注文数を修正してくださいお。
                 {% endif %}
             </td>
+            <td>
+                <a href="{% url 'products:cartitem_update' pk=item.id %}">修正</a>
+            </td>
         </tr>
         {% endfor %}
     <tbody>
@@ -34,6 +37,9 @@
 
 <div style="text-align: right; margin-top: 20px;">
     <strong>合計金額: {{ total_price }}円</strong>
+</div>
+<div style="text-align: right; margin-top: 20px;">
+    <a href="{% url 'products:input_address' %}" ><button>住所を入力する</button></a>
 </div>
 
 

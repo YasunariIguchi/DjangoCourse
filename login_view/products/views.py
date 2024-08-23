@@ -1,12 +1,16 @@
+from typing import Any
 from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 # Create your views here.
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from .models import Product, Cart, CartItem
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from .models import Product, Cart, CartItem, Address
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, Http404
+from django.http import HttpRequest, HttpResponse, JsonResponse, Http404
+from .forms import CartItemForm, AddressForm
+
 
 class ProductListView(LoginRequiredMixin, ListView):
     model = Product
@@ -96,3 +100,41 @@ class CartItemListView(LoginRequiredMixin, ListView):
         context["total_price"] = total_price
 
         return context
+
+
+class CartItemUpdateView(LoginRequiredMixin, UpdateView):
+    model = CartItem
+    template_name = "cartitem_update.html"
+    form_class = CartItemForm
+
+    def get_success_url(self) -> str:
+        # print(self.get_object)
+        return reverse_lazy("products:cartitem_list")
+
+
+class CartItemDeleteView(LoginRequiredMixin, DeleteView):
+    model = CartItem
+    template_name = "cartitem_delete.html"
+
+    def get_success_url(self) -> str:
+        # print(self.get_object)
+        return reverse_lazy("products:cartitem_list")
+
+
+class InputAddressView(LoginRequiredMixin, CreateView):
+    model = Address
+    template_name = "input_address.html"
+    form_class = AddressForm
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user  # ログイン中のユーザーを設定
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        # print(self.get_object)
+        return reverse_lazy("products:cartitem_list")
+
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.cart.cartitem_set.exists():
+            raise Http404("商品が入っていませんお")
+        return super().get(request, *args, **kwargs)

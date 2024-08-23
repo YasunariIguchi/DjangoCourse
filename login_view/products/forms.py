@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product, Picture
+from .models import Product, Picture, CartItem, Address
 from accounts.models import User
 from datetime import datetime
 
@@ -29,3 +29,28 @@ class PictureUploadForm(forms.ModelForm):
         # obj.product = kwargs.get("product")
         obj.save()
         return obj
+
+
+class CartItemForm(forms.ModelForm):
+    class Meta:
+        model = CartItem
+        fields = ['quantity']
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get('quantity')
+        if quantity < 1:
+            raise forms.ValidationError("数量は1以上でなければなりません。")
+        if quantity > self.instance.product.stock:
+            raise forms.ValidationError("在庫数を超えた数量の注文はできません。")
+        return quantity
+
+
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        exclude = ['user']
+        labels = {
+            "zip_code": "郵便番号",
+            "prefecture": "都道府県",
+            "address": "住所詳細"
+        }
