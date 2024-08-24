@@ -115,3 +115,26 @@ class Address(models.Model):
 
     def __str__(self) -> str:
         return f"{self.zip_code} {self.prefecture} {self.address}"
+
+
+class Order(models.Model):
+    total_price = models.PositiveIntegerField()
+    address = models.ForeignKey(Address,
+                                on_delete=models.SET_NULL,
+                                null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL,
+                             blank=True, null=True)
+
+    class Meta:
+        db_table = "orders"
+
+
+class OrderItem(models.Model):
+    product = models.ForeignKey(Product, null=True,
+                                blank=True, on_delete=models.SET_NULL)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = "order_items"
+        unique_together = [["product", "order"]]

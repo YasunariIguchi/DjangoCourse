@@ -38,9 +38,25 @@
 <div style="text-align: right; margin-top: 20px;">
     <strong>合計金額: {{ total_price }}円</strong>
 </div>
+<!--
+{% if address %}
 <div style="text-align: right; margin-top: 20px;">
-    <a href="{% url 'products:input_address' %}" ><button>住所を入力する</button></a>
+    <p>住所：{{ address.zip_code}} {{ address.prefecture }} {{ address.address}}</p>
 </div>
+{% else %}
+<div style="text-align: right; margin-top: 20px;">
+    <p>まだ住所は指定されてないお</p>
+</div>
+{% endif %}
+<div style="text-align: right; margin-top: 20px;">
+    <a href="{% url 'products:input_address' %}" ><button>住所を指定する</button></a>
+</div>
+-->
+{% if items %}
+<div style="text-align: right; margin-top: 20px;">
+    <a href="{% url 'products:confirm_order' %}" ><button>注文する</button></a>
+</div>
+{% endif %}
 
 
 {% endblock %}

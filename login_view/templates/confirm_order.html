@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if items %}
+<h1>注文前の確認だお</h1>
+<form method="POST">
+{% csrf_token %}
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>写真</th><th>名前</th><th>価格</th><th>数量</th><th>注文内容の修正</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    {% if item.picture %}
+                    <img width="50" height="50" src="{{ item.picture.url }}">
+                    {% endif %}
+                </td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td><a href="{% url 'products:cartitem_update' pk=item.id %}">変更</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <div style="text-align: right; margin-top: 20px;">
+        <p>合計金額：{{ total_price }}</p>
+        {% if address %}
+        <br>
+        <p>住所：{{ address.zip_code}} {{ address.prefecture }} {{ address.address}}</p>
+        <a href="{% url 'products:input_address' %}">住所を変更</a>
+        {% else %}
+        <p>住所：未定</p>
+        <a href="{% url 'products:input_address' %}">住所を入力</a>
+        {% endif %}
+    {% if address %}
+    <input type="submit" value="注文確定！">
+    {% endif %}
+    </div>
+</form>
+
+{% else %}
+<p>カートが空だお</p>
+{% endif %}
+
+{% endblock %}

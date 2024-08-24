@@ -11,6 +11,7 @@
             {% if user.is_authenticated %}
             <form method="POST" action="{% url 'accounts:user_logout' %}" style="display:inline;">
                 {% csrf_token %}
+                <a class="navbar-brand" href="{% url 'products:product_list' %}">商品一覧</a>
                 <a class="navbar-brand" href="{% url 'products:cartitem_list' %}">カート確認</a>
                 <button type="submit" class="btn btn-link navbar-brand" style="display:inline; padding:0; border:none; background:none;">ログアウト</button>
             </form>

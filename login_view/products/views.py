@@ -1,17 +1,20 @@
 from typing import Any
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
+
 # Create your views here.
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from .models import Product, Cart, CartItem, Address
+from django.views.generic.base import TemplateView
+from .models import Product, Cart, CartItem, Address, Picture, Order, OrderItem
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpRequest, HttpResponse, JsonResponse, Http404
 from .forms import CartItemForm, AddressForm
 from django.core.cache import cache
+from django.db import transaction
 
 
 class ProductListView(LoginRequiredMixin, ListView):
@@ -42,13 +45,16 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["is_added"] = CartItem.objects.filter(product=context["product"], cart=Cart.objects.filter(user=self.request.user).first()).exists()
+        context["is_added"] = CartItem.objects.filter(
+            product=context["product"],
+            cart=Cart.objects.filter(user=self.request.user).first(),
+        ).exists()
         return context
 
 
 @login_required
 def add_product(request):
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
         product_id = request.POST.get("product_id")
         quantity = request.POST.get("quantity")
         product = get_object_or_404(Product, id=product_id)
@@ -63,9 +69,7 @@ def add_product(request):
         cart = Cart.objects.get_or_create(user=request.user)
         if all([product_id, cart, quantity]):
             CartItem.objects.save_item(
-                quantity=quantity,
-                product_id=product_id,
-                cart=cart[0]
+                quantity=quantity, product_id=product_id, cart=cart[0]
             )
             return JsonResponse({"message": "商品をカートに追加しました。"})
 
@@ -100,6 +104,7 @@ class CartItemListView(LoginRequiredMixin, ListView):
             items.append(tmp_item)
         context["items"] = items
         context["total_price"] = total_price
+        context["address"] = cache.get(f"address_user_{self.request.user.id}")
 
         return context
 
@@ -130,7 +135,7 @@ class InputAddressView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        address = cache.get(f'address_user_{self.request.user.id}')
+        address = cache.get(f"address_user_{self.request.user.id}")
         if address:
             context["form"].fields["zip_code"].initial = address.zip_code
             context["form"].fields["prefecture"].initial = address.prefecture
@@ -146,17 +151,18 @@ class InputAddressView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self) -> str:
         # print(self.get_object)
-        return reverse_lazy("products:cartitem_list")
+        return reverse_lazy("products:confirm_order")
 
     def get(self, request, *args, **kwargs):
         if not self.request.user.cart.cartitem_set.exists():
             raise Http404("商品が入っていませんお")
         return super().get(request, *args, **kwargs)
 
+
 @login_required
 @require_POST
 def change_address(request):
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
         address_id = request.POST.get("address_id")
         try:
             address = Address.objects.get(id=address_id, user=request.user)
@@ -169,3 +175,67 @@ def change_address(request):
         except Address.DoesNotExist:
             return JsonResponse({"message": "住所が見つかりませんでした"}, status=404)
     return JsonResponse({"message": "無効なリクエストです"}, status=400)
+
+
+class ConfirmOrderView(LoginRequiredMixin, TemplateView):
+    template_name = "confirm_order.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart = get_object_or_404(Cart, user_id=self.request.user.id)
+        context["cart"] = cart
+        # cartitem_list = CartItem.objects.filter(cart__user=self.request.user)
+        # context["cartitem_list"] = cartitem_list
+        address = cache.get(f"address_user_{self.request.user.id}")
+        context["address"] = address
+        total_price = 0
+        items = []
+        for item in cart.cartitem_set.all():
+            total_price += item.product.price * item.quantity
+            picture = item.product.picture_set.first()
+            picture = picture.picture if picture else None
+            tmp_item = {
+                "id": item.id,
+                "picture": picture,
+                "name": item.product.name,
+                "quantity": item.quantity,
+                "price": item.product.price,
+                }
+            items.append(tmp_item)
+        context["items"] = items
+        context["total_price"] = total_price
+
+        self.request.session['total_price'] = total_price
+        self.request.session['address_id'] = address.id
+
+        return context
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        total_price = self.request.session.get('total_price', 0)
+        address_id = self.request.session.get('address_id', "")
+        order = Order(
+            user=request.user,
+            address_id=address_id,
+            total_price=total_price
+        )
+        order.save()
+
+        for cart_item in request.user.cart.cartitem_set.all():
+            product = cart_item.product
+            if product.stock < cart_item.quantity:
+                raise Http404("注文処理でエラーが発生しました。")
+            product.stock -= cart_item.quantity
+            product.save()
+            order_item = OrderItem(
+                order=order,
+                product=cart_item.product,
+                quantity=cart_item.quantity
+            )
+            order_item.save()
+            cart_item.delete()
+
+        del self.request.session['total_price']
+        del self.request.session['address_id']
+
+        return redirect('products:product_list')

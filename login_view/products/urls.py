@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import ProductListView, ProductDetailView, CartItemUpdateView, \
     add_product, CartItemListView, CartItemDeleteView, InputAddressView, \
-    change_address
+    change_address, ConfirmOrderView
 
 app_name = "products"
 
@@ -15,4 +15,5 @@ urlpatterns = [
     path("cartitem_delete/<int:pk>", CartItemDeleteView.as_view(), name="cartitem_delete"),
     path("input_address/", InputAddressView.as_view(), name="input_address"),
     path("change_address/", change_address, name="change_address"),
+    path("confirm_order/", ConfirmOrderView.as_view(), name="confirm_order"),
 ]
