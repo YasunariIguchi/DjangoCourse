@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse, Http404
 from .forms import CartItemForm, AddressForm
+from django.core.cache import cache
 
 
 class ProductListView(LoginRequiredMixin, ListView):
@@ -125,6 +126,15 @@ class InputAddressView(LoginRequiredMixin, CreateView):
     model = Address
     template_name = "input_address.html"
     form_class = AddressForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        address = cache.get(f'address_user_{self.request.user.id}')
+        if address:
+            context["form"].fields["zip_code"].initial = address.zip_code
+            context["form"].fields["prefecture"].initial = address.prefecture
+            context["form"].fields["address"].initial = address.address
+        return context
 
     def form_valid(self, form):
         form.instance.user = self.request.user  # ログイン中のユーザーを設定

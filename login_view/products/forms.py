@@ -1,7 +1,9 @@
+from typing import Any
 from django import forms
 from .models import Product, Picture, CartItem, Address
 from accounts.models import User
 from datetime import datetime
+from django.core.cache import cache
 
 
 class ProductForm(forms.ModelForm):
@@ -54,3 +56,8 @@ class AddressForm(forms.ModelForm):
             "prefecture": "都道府県",
             "address": "住所詳細"
         }
+
+    def save(self) -> Any:
+        address = super().save()
+        cache.set(f'address_user_{address.user.id}', address)
+        return address
