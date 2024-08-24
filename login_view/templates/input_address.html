@@ -8,5 +8,47 @@
 <input type="submit" value="登録">
 </form>
 
+{% if address_options %}
+<br>
+<h2>住所を選択する</h2>
+{% for address_option in address_options %}
+<p>
+    <input type="radio" name="selected_address" value="{{ address_option.id }}"
+    {% if address_option.id == cached_address_id %}checked{% endif %}>
+    {{ address_option.zip_code }} {{ address_option.prefecture }} {{ address_option.address }}
+</p>
+{% endfor %}
+{% endif %}
+
+<script>
+    document.querySelectorAll('input[name="selected_address"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var selectedAddressId = this.value;
+            var token = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            $.ajaxSetup({
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", token);
+                }
+            });
+
+            $.ajax({
+                url: "{% url 'products:change_address' %}",
+                type: "POST",
+                data: { address_id: selectedAddressId },
+                dataType: "json",
+                success: function(response) {
+                    document.querySelector('input[name="zip_code"]').value = response.zip_code;
+                    document.querySelector('input[name="prefecture"]').value = response.prefecture;
+                    document.querySelector('input[name="address"]').value = response.address;
+                    // alert('住所が変更されました');
+                },
+                error: function(error) {
+                    alert(error.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>
 
 {% endblock %}

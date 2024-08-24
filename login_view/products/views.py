@@ -1,6 +1,6 @@
 from typing import Any
 from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 # Create your views here.
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -8,6 +8,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from .models import Product, Cart, CartItem, Address
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.http import HttpRequest, HttpResponse, JsonResponse, Http404
 from .forms import CartItemForm, AddressForm
 from django.core.cache import cache
@@ -134,6 +135,9 @@ class InputAddressView(LoginRequiredMixin, CreateView):
             context["form"].fields["zip_code"].initial = address.zip_code
             context["form"].fields["prefecture"].initial = address.prefecture
             context["form"].fields["address"].initial = address.address
+            context["cached_address_id"] = address.id
+        address_options = Address.objects.filter(user=self.request.user).all()
+        context["address_options"] = address_options
         return context
 
     def form_valid(self, form):
@@ -148,3 +152,20 @@ class InputAddressView(LoginRequiredMixin, CreateView):
         if not self.request.user.cart.cartitem_set.exists():
             raise Http404("商品が入っていませんお")
         return super().get(request, *args, **kwargs)
+
+@login_required
+@require_POST
+def change_address(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        address_id = request.POST.get("address_id")
+        try:
+            address = Address.objects.get(id=address_id, user=request.user)
+            response_data = {
+                "zip_code": address.zip_code,
+                "prefecture": address.prefecture,
+                "address": address.address,
+            }
+            return JsonResponse(response_data)
+        except Address.DoesNotExist:
+            return JsonResponse({"message": "住所が見つかりませんでした"}, status=404)
+    return JsonResponse({"message": "無効なリクエストです"}, status=400)

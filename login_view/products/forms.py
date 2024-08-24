@@ -4,6 +4,7 @@ from .models import Product, Picture, CartItem, Address
 from accounts.models import User
 from datetime import datetime
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 
 
 class ProductForm(forms.ModelForm):
@@ -58,6 +59,16 @@ class AddressForm(forms.ModelForm):
         }
 
     def save(self) -> Any:
-        address = super().save()
+        address_data = self.cleaned_data
+        try:
+            address = Address.objects.get(
+                user=self.instance.user,
+                zip_code=address_data['zip_code'],
+                prefecture=address_data['prefecture'],
+                address=address_data['address']
+            )
+        except Address.DoesNotExist:
+            address = Address.objects.create(user=self.instance.user, **address_data)
+
         cache.set(f'address_user_{address.user.id}', address)
         return address
